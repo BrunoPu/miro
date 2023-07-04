@@ -1,2 +1,2 @@
+A gestão de responsáveis era realizada manualmente, o que gerava uma alta demanda para os analistas da squad.
 
-"A ausência de uma métrica objetiva para avaliar a satisfação dos nossos clientes tem dificultado a identificação precisa de áreas de melhoria e a alocação adequada de recursos para aprimorar a experiência do usuário em nosso sistema."
