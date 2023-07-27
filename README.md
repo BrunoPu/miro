@@ -1,1 +1,2 @@
-Após implementarmos a autenticação automática em nosso sistema interno corporativo, desfrutamos de um notável aumento na segurança dos dados, agilidade no acesso às informações e uma redução significativa das preocupações com autenticação manual, o que impulsionou consideravelmente a eficiência geral das operações
+
+Ao proporcionar autonomia aos usuários para editar suas próprias informações no sistema corporativo, obtivemos uma redução de tarefas administrativas, maior agilidade nos processos internos e um aumento na satisfação dos colaboradores com a possibilidade de gerenciar suas informações de forma direta e eficiente
