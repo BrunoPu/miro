@@ -1,1 +1,1 @@
-A implementação da aprovação automática de solicitações de certificado reduziu significativamente o tempo de espera, acelerando o processo de obtenção de certificados de 6 dias úteis para apenas 5 minutos no sistema de gestão de certificados, proporcionando um benefício notável aos usuários.
+Implementar a visibilidade do ambiente onde o certificado está instalado melhora significativamente a visibilidade da criticidade, proporcionando benefícios no acompanhamento e gerenciamento dos certificados.
