@@ -1,5 +1,6 @@
 from flask import Flask, request, Response
 import urllib.request
+import ssl
 
 app = Flask(__name__)
 
@@ -11,6 +12,20 @@ def process_xml():
     # Enviar um pedido SOAP usando o XML recebido
     url = 'URL_DO_WEBSERVICE'  # Substitua pelo URL real do serviço SOAP
     headers = {'Content-Type': 'text/xml'}  # Cabeçalhos da solicitação
+
+    # Criar um contexto SSL sem verificação de certificado
+    ssl_context = ssl.create_default_context()
+    ssl_context.check_hostname = False
+    ssl_context.verify_mode = ssl.CERT_NONE
+
+    # Configurar um manipulador HTTPS com o contexto SSL personalizado
+    https_handler = urllib.request.HTTPSHandler(context=ssl_context)
+
+    # Criar um opener personalizado
+    opener = urllib.request.build_opener(https_handler)
+
+    # Instalar o opener personalizado
+    urllib.request.install_opener(opener)
 
     # Criar uma solicitação usando urllib.request
     req = urllib.request.Request(url, data=xml_data, headers=headers, method='POST')
