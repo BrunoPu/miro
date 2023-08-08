@@ -1,6 +1,5 @@
-
-from flask import Flask, request
-import requests
+from flask import Flask, request, Response
+import urllib.request
 
 app = Flask(__name__)
 
@@ -9,18 +8,19 @@ def process_xml():
     # Receber o XML da solicitação POST
     xml_data = request.data
 
-    # Enviar um pedido SOAP usando o mesmo XML recebido
-    response = requests.post('URL_DO_WEBSERVICE', data=xml_data, headers={'Content-Type': 'text/xml'})
+    # Enviar um pedido SOAP usando o XML recebido
+    url = 'URL_DO_WEBSERVICE'  # Substitua pelo URL real do serviço SOAP
+    headers = {'Content-Type': 'text/xml'}  # Cabeçalhos da solicitação
 
-    return response.content, response.status_code, response.headers.items()
+    # Criar uma solicitação usando urllib.request
+    req = urllib.request.Request(url, data=xml_data, headers=headers, method='POST')
+
+    # Fazer a solicitação e ler a resposta
+    with urllib.request.urlopen(req) as response:
+        soap_response = response.read()  # Ler a resposta da solicitação
+
+    # Retornar a resposta SOAP como uma resposta HTTP do Flask
+    return Response(response=soap_response, content_type='text/xml')
 
 if __name__ == '__main__':
-    app.run(debug=True)
-Neste exemplo, o código recebe o XML via solicitação POST e, em seguida, envia uma solicitação SOAP usando o mesmo XML recebido para uma URL fictícia (você deve substituir 'URL_DO_WEBSERVICE' pela URL real do serviço SOAP que você deseja acessar).
-
-Certifique-se de adaptar este exemplo para a sua situação específica, incluindo a substituição da URL real e quaisquer outras considerações de segurança que você precise ter em mente ao lidar com dados de solicitação e envio de solicitações para um serviço SOAP.
-
-
-
-
-
+    app.run(debug=True)  # Iniciar o servidor Flask em modo de depuração
