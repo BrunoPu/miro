@@ -1,2 +1,32 @@
 
-<!DOCTYPE html> <html> <head> <style> body { background-color: #f5f5f5; font-family: Arial, sans-serif; } .container { width: 100%; padding: 16px; box-sizing: border-box; background-color: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); } .logo { max-width: 100%; height: auto; } .text-center { text-align: center; } .bold { font-weight: bold; } .renew-button { display: inline-block; background-color: #4CAF50; color: white; padding: 12px 24px; text-align: center; text-decoration: none; border-radius: 4px; font-size: 16px; margin: 10px 2px; cursor: pointer; } .renew-button:hover { background-color: #45a049; } </style> </head> <body> <div class="container"> <img class="logo" src="data:image/png;base64,iVBORw0KGg..." alt="Logo Certificado Vault On-Premises"> <h1 class="text-center bold">Renovação do Certificado</h1> <p>Chegou o momento de renovar o certificado <b>NOME DO CERTIFICADO</b> até dia XX / XX / XXXhXX.</p> <p>Para renovar, clique no botão abaixo:</p> <a href="#" class="renew-button">Renovar Certificado</a>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Renovação do Certificado</title>
+</head>
+<body>
+    <h1>Chegou o momento de renovar o certificado NOME DO CERTIFICADO ate odia XX / XX / XXXhXX</h1>
+    <p>Veja as informações do seu certificado:</p>
+    <ul>
+        <li>Responsável: Segurança da Informação Itaú</li>
+        <li>Sigla: LKB</li>
+        <li>Numero de Serie: renovar certificado</li>
+    </ul>
+    <p>Você pode renová-lo clicando no botão abaixo:</p>
+    <button onclick="renewCertificate()">Renovar Certificado</button>
+    <script>
+        function renewCertificate() {
+            // Aqui você pode colocar o código para renovar o certificado
+            alert("Certificado renovado com sucesso!");
+        }
+    </script>
+    <p>Perguntas frequentes:</p>
+    <ul>
+        <li>Como é feita a renovação?</li>
+        <li>Caso o certificado não esteja em uso, e não seja necessario renové-lo, o que fazer?</li>
+        <li>Precisa de ajuda?</li>
+    </ul>
+    <h2>Imagem do Certificado</h2>
+    <img src="URL_DA_IMAGEM" alt="Certificado Vault On - Premises">
+</body>
+</html>
