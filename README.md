@@ -1,31 +1,16 @@
-from flask import Flask, jsonify
-import requests
 
-app = Flask(__name__)
+<!DOCTYPE html> <html lang="pt"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Chegou o momento de renovar o certificado</title> </head> <body> <h1>Chegou o momento de renovar o certificado</h1> <h2>NOME DO CERTIFICADO</h2> <h3>Responsável: Segurança da Informação Itaú</h3> <h3>Sigla: LKB</h3> <h3>Número de Série: renovar certificado</h3>
+Download
+Copy code
+<h3>Você pode renová-lo clicando no botão abaixo:</h3>
+<button onclick="window.location.href='renovar-certificado.html'">Renovar Certificado</button>
 
-@app.route('/fazer_login', methods=['GET'])
-def fazer_login():
-    # URL do serviço de login (substitua pela URL correta)
-    url = 'https://teste.login.com.br'
-    
-    # Caminhos para os certificados e chaves
-    cert_path = '/home/brupugl/cer/certificado.crt'
-    key_path = '/home/brupugl/cer/chave.key'
-    cacert_path = '/home/brupugl/cer/CA-cert.pem'
-    
-    # Realiza a solicitação POST com os certificados e verifica o certificado do servidor
-    response = requests.post(
-        url,
-        cert=(cert_path, key_path),
-        verify=cacert_path
-    )
-    
-    # Verifica se o login foi bem-sucedido (código de status 200)
-    if response.status_code == 200:
-        token = response.text  # Assume que o token é retornado no corpo da resposta
-        return jsonify({'token': token})  # Retorna o token como JSON
-    else:
-        return jsonify({'error': 'Login failed'}), 401  # Retorna erro 401 se o login falhar
+<h3>Perguntas Frequentes:</h3>
+<h4>Como é feita a renovação?</h4>
+<p>Squad PR ACXXXII la coma crucão de um novo certificado.</p>
 
-if __name__ == '__main__':
-    app.run(debug=True)
+<h4>Caso o certificado não esteja em uso, e não seja necessário renové-lo, o que fazer?</h4>
+<p>Precisa de ajuda?</p>
+
+<img src="certificado-vault-on-premises.png" alt="Imagem do Certificado Vault On-Premises">
+</body> </html>
