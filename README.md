@@ -1,6 +1,7 @@
 using System;
 using System.Data.SqlClient;
-using OfficeOpenXml;
+using System.Data;
+using System.IO;
 using System.Web.Services;
 
 namespace ExcelToDatabase
@@ -18,32 +19,32 @@ namespace ExcelToDatabase
             {
                 connection.Open();
 
-                // Abrindo o arquivo Excel usando o pacote EPPlus
-                using (ExcelPackage package = new ExcelPackage(new System.IO.FileInfo(excelFilePath)))
+                // Abrindo o arquivo Excel
+                using (FileStream stream = File.Open(excelFilePath, FileMode.Open, FileAccess.Read))
                 {
-                    // Acessando a primeira planilha do arquivo Excel
-                    ExcelWorksheet worksheet = package.Workbook.Worksheets[0];
-
-                    // Obtendo o número de linhas e colunas na planilha
-                    int rowCount = worksheet.Dimension.Rows;
-                    int columnCount = worksheet.Dimension.Columns;
-
-                    // Iterando sobre as linhas da planilha
-                    for (int row = 2; row <= rowCount; row++) // Começa do 2 porque geralmente a primeira linha é o cabeçalho
+                    using (StreamReader reader = new StreamReader(stream))
                     {
-                        // Montando a query de inserção
-                        string query = "INSERT INTO SuaTabela (Nome, Sobrenome, Idade) VALUES (@Nome, @Sobrenome, @Idade)";
-
-                        // Criando o comando SQL com a query e a conexão
-                        using (SqlCommand command = new SqlCommand(query, connection))
+                        // Lendo as linhas do arquivo Excel
+                        string line;
+                        while ((line = reader.ReadLine()) != null)
                         {
-                            // Definindo os parâmetros do comando SQL com os valores da planilha
-                            command.Parameters.AddWithValue("@Nome", worksheet.Cells[row, 1].Value);
-                            command.Parameters.AddWithValue("@Sobrenome", worksheet.Cells[row, 2].Value);
-                            command.Parameters.AddWithValue("@Idade", worksheet.Cells[row, 3].Value);
+                            // Dividindo a linha em valores separados por vírgula
+                            string[] values = line.Split(',');
 
-                            // Executando o comando SQL para inserir os dados no banco de dados
-                            command.ExecuteNonQuery();
+                            // Montando a query de inserção
+                            string query = "INSERT INTO SuaTabela (Nome, Sobrenome, Idade) VALUES (@Nome, @Sobrenome, @Idade)";
+
+                            // Criando o comando SQL com a query e a conexão
+                            using (SqlCommand command = new SqlCommand(query, connection))
+                            {
+                                // Definindo os parâmetros do comando SQL com os valores da linha do Excel
+                                command.Parameters.AddWithValue("@Nome", values[0]);
+                                command.Parameters.AddWithValue("@Sobrenome", values[1]);
+                                command.Parameters.AddWithValue("@Idade", values[2]);
+
+                                // Executando o comando SQL para inserir os dados no banco de dados
+                                command.ExecuteNonQuery();
+                            }
                         }
                     }
                 }
