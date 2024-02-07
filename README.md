@@ -1,46 +1,50 @@
 using System;
 using System.Data.SqlClient;
 using OfficeOpenXml;
+using System.Web.Services;
 
 namespace ExcelToDatabase
 {
-    public class ExcelToDatabaseHandler
+    public class YourWebService : WebService
     {
-        private readonly SqlConnection _connection;
-
-        public ExcelToDatabaseHandler(SqlConnection connection)
+        [WebMethod]
+        public void InsertExcelData(string excelFilePath)
         {
-            _connection = connection ?? throw new ArgumentNullException(nameof(connection));
-        }
+            // String de conexão com o banco de dados
+            string connectionString = "SuaConnectionString";
 
-        public void InsertDataFromExcel(string excelFilePath)
-        {
-            // Abrindo o arquivo Excel usando o pacote EPPlus
-            using (ExcelPackage package = new ExcelPackage(new System.IO.FileInfo(excelFilePath)))
+            // Abrindo a conexão com o banco de dados
+            using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                // Acessando a primeira planilha do arquivo Excel
-                ExcelWorksheet worksheet = package.Workbook.Worksheets[0];
+                connection.Open();
 
-                // Obtendo o número de linhas e colunas na planilha
-                int rowCount = worksheet.Dimension.Rows;
-                int columnCount = worksheet.Dimension.Columns;
-
-                // Iterando sobre as linhas da planilha
-                for (int row = 2; row <= rowCount; row++) // Começa do 2 porque geralmente a primeira linha é o cabeçalho
+                // Abrindo o arquivo Excel usando o pacote EPPlus
+                using (ExcelPackage package = new ExcelPackage(new System.IO.FileInfo(excelFilePath)))
                 {
-                    // Montando a query de inserção
-                    string query = "INSERT INTO SuaTabela (Nome, Sobrenome, Idade) VALUES (@Nome, @Sobrenome, @Idade)";
+                    // Acessando a primeira planilha do arquivo Excel
+                    ExcelWorksheet worksheet = package.Workbook.Worksheets[0];
 
-                    // Criando o comando SQL com a query e a conexão
-                    using (SqlCommand command = new SqlCommand(query, _connection))
+                    // Obtendo o número de linhas e colunas na planilha
+                    int rowCount = worksheet.Dimension.Rows;
+                    int columnCount = worksheet.Dimension.Columns;
+
+                    // Iterando sobre as linhas da planilha
+                    for (int row = 2; row <= rowCount; row++) // Começa do 2 porque geralmente a primeira linha é o cabeçalho
                     {
-                        // Definindo os parâmetros do comando SQL com os valores da planilha
-                        command.Parameters.AddWithValue("@Nome", worksheet.Cells[row, 1].Value);
-                        command.Parameters.AddWithValue("@Sobrenome", worksheet.Cells[row, 2].Value);
-                        command.Parameters.AddWithValue("@Idade", worksheet.Cells[row, 3].Value);
+                        // Montando a query de inserção
+                        string query = "INSERT INTO SuaTabela (Nome, Sobrenome, Idade) VALUES (@Nome, @Sobrenome, @Idade)";
 
-                        // Executando o comando SQL
-                        command.ExecuteNonQuery();
+                        // Criando o comando SQL com a query e a conexão
+                        using (SqlCommand command = new SqlCommand(query, connection))
+                        {
+                            // Definindo os parâmetros do comando SQL com os valores da planilha
+                            command.Parameters.AddWithValue("@Nome", worksheet.Cells[row, 1].Value);
+                            command.Parameters.AddWithValue("@Sobrenome", worksheet.Cells[row, 2].Value);
+                            command.Parameters.AddWithValue("@Idade", worksheet.Cells[row, 3].Value);
+
+                            // Executando o comando SQL para inserir os dados no banco de dados
+                            command.ExecuteNonQuery();
+                        }
                     }
                 }
             }
