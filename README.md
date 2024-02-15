@@ -1,22 +1,8 @@
-SELECT DISTINCT 
+SELECT 
     CASE 
-        WHEN LEFT(REPLACE(m.nomecertificado, '*.', ''), 2) = '.'
-        THEN SUBSTRING(REPLACE(m.nomecertificado, '*.', ''), 2, LEN(m.nomecertificado) - 1)
-        ELSE m.nomecertificado
-    END AS nomecertificado_sem_prefixo
-FROM 
-    tbFilacertificadoAWSmanual m
-LEFT JOIN 
-    tbCertificadosawsLegado l ON 
-        CASE 
-            WHEN LEFT(REPLACE(m.nomecertificado, '*.', ''), 2) = '.'
-            THEN SUBSTRING(REPLACE(m.nomecertificado, '*.', ''), 2, LEN(m.nomecertificado) - 1)
-            ELSE m.nomecertificado
-        END = 
-        CASE 
-            WHEN LEFT(REPLACE(l.certificado, '*.', ''), 2) = '.'
-            THEN SUBSTRING(REPLACE(l.certificado, '*.', ''), 2, LEN(l.certificado) - 1)
-            ELSE l.certificado
-        END
-WHERE 
-    l.certificado IS NULL;
+        WHEN LEFT(NomeCertificado, 1) = '*' THEN SUBSTRING(NomeCertificado, 2, LEN(NomeCertificado) - 1)
+        ELSE NomeCertificado
+    END AS NomeCertificado_sem_prefixo
+FROM TBFilaCertificadoAWSmanual
+WHERE LEFT(NomeCertificado, 1) != '*'
+   OR NomeCertificado IS NULL;
