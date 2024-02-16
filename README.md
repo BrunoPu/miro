@@ -1,9 +1,39 @@
-SELECT 
-    -- Remove o prefixo '*.' se estiver presente
-    CASE 
-        WHEN LEFT(NomeCertificado, 2) = '*.' THEN SUBSTRING(NomeCertificado, 3, LEN(NomeCertificado) - 2) -- Se for '*.', remove '*.' e retorna o restante da string
-        ELSE NomeCertificado -- Se não for '*.', retorna NomeCertificado sem fazer alterações
-    END AS NomeCertificado_sem_prefixo,
-    -- Seleciona a coluna dtsolicitacao
-    dtsolicitacao
-FROM TBFilaCertificadoAWSmanual;
+INSERT INTO TBCertficadosAWSLegado
+(accountId,
+arn,
+resourceid,
+CertificadoNome,
+subjectAlternativeNames,
+dtVencimento,
+dtEmissao,
+renewalEligibility,
+ambiente,
+InternoExterno,
+NomeProduto,
+Sigla,
+Comunidade,
+SupportGruup,
+Status,
+Observacao,
+Regiao)
+SELECT
+RIGHT('000000000000' + CAST(@accountId AS VARCHAR(12)), 12),
+@accountId,
+@arn,
+@resourceId,
+@CertificadoNome,
+@subjectAlternativeNames,
+@dtVencimento,
+@dtEmissao,
+@renewalEligibility,
+ambiente,
+InternoExterno,
+NomeProduto,
+Sigla,
+Comunidade,
+SupportGruup,
+Status,
+Observacao,
+Regiao
+FROM TBFilaCertificadosAWSmanual (nolock) 
+WHERE @CertificadoNome = NomeCertificado OR @arn = ArnCertificado;
