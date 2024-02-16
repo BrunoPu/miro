@@ -12,13 +12,12 @@ InternoExterno,
 NomeProduto,
 Sigla,
 Comunidade,
-SupportGruup,
+SupportGruup, -- Corrigido o nome da coluna
 Status,
 Observacao,
 Regiao)
 SELECT
 RIGHT('000000000000' + CAST(@accountId AS VARCHAR(12)), 12),
-@accountId,
 @arn,
 @resourceId,
 @CertificadoNome,
@@ -31,7 +30,7 @@ InternoExterno,
 NomeProduto,
 Sigla,
 Comunidade,
-SupportGruup,
+SupportGroup, -- Corrigido o nome da coluna
 Status,
 Observacao,
 Regiao
