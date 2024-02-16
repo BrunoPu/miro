@@ -1,25 +1,39 @@
--- Declaração da tabela temporária @responsavel para armazenar os resultados
-DECLARE @responsavel TABLE (
-    idcertificado INT,  -- Identificador do certificado
-    AnalistaFuncional VARCHAR(MAX),  -- Funcional do analista
-    AnalistaNome VARCHAR(300),  -- Nome do analista
-    dtcadastro DATE  -- Data de cadastro
-)
-
--- Inserção dos dados na tabela @responsavel
-INSERT INTO @responsavel (idcertificado, AnalistaFuncional, AnalistaNome)
--- Seleção dos dados distintos da tabela TBCertificados AWSAPI com aplicação de função de split
-SELECT DISTINCT
-    C.id,  -- Identificador do certificado
-    -- Extrai a parte da funcional antes do '-' se presente, senão usa o valor completo
-    CASE WHEN CHARINDEX('-', split.value) > 0 THEN LEFT(split.value, CHARINDEX('-', split.value) - 1) ELSE split.value END AS Funcional,
-    R.Nome  -- Selecionando o nome da tabela TBReflector usando a funcional como chave
--- Tabela principal
-FROM
-    TBCertificados AWSAPI C (NOLOCK)
--- Aplicação da função de split para separar os valores do campo analista_funcional
-CROSS APPLY
-    STRING_SPLIT(C.analista_funcional, ',') AS split
--- Junção com a tabela TBReflector usando a funcional como chave
-LEFT JOIN
-    TBReflector R ON CASE WHEN CHARINDEX('-', split.value) > 0 THEN LEFT(split.value, CHARINDEX('-', split.value) - 1) ELSE split.value END = R.Funcional
+INSERT INTO TBCertficadosAWSLegado
+(accountId,
+arn,
+resourceid,
+CertificadoNome,
+subjectAlternativeNames,
+dtVencimento,
+dtEmissao,
+renewalEligibility,
+ambiente,
+InternoExterno,
+NomeProduto,
+Sigla,
+Comunidade,
+SupportGruup,
+Status,
+Observacao,
+Regiao)
+SELECT
+RIGHT('000000000000' + CAST(@accountId AS VARCHAR(12)), 12),
+@accountId,
+@arn,
+@resourceId,
+@CertificadoNome,
+@subjectAlternativeNames,
+@dtVencimento,
+@dtEmissao,
+@renewalEligibility,
+ambiente,
+InternoExterno,
+NomeProduto,
+Sigla,
+Comunidade,
+SupportGruup,
+Status,
+Observacao,
+Regiao
+FROM TBFilaCertificadosAWSmanual (nolock) 
+WHERE @CertificadoNome = NomeCertificado OR @arn = ArnCertificado;
