@@ -1,12 +1,10 @@
-SELECT
-    @id AS idCertificado,
-    LEFT(split.value, CHARINDEX('-', split.value) - 1) AS AnalistaFuncional,
-    SUBSTRING(split.value, CHARINDEX('-', split.value) + 1, LEN(split.value) - CHARINDEX('-', split.value)) AS AnalistaNome
-FROM
-    TBFilaCertificadosAWSmanual C (NOLOCK)
-CROSS APPLY
-    STRING_SPLIT(C.Responsavel, ',') AS split
-WHERE
-    (C.NomeCertificado = @certificadoNome OR @arn = C.ArnCertificado)
+  SELECT DISTINCT
+                @id,
+                CASE WHEN CHARINDEX('-', split.value) > 0 THEN LEFT(split.value, CHARINDEX('-', split.value) - 1) ELSE split.value END AS Funcional,
+                R.Nome
+            FROM TBFilaCertificadosAWSmanual C (NOLOCK)
+            CROSS APPLY STRING_SPLIT(C.Responsavel, ',') AS split
+            LEFT JOIN TBReflector R ON CASE WHEN CHARINDEX('-', split.value) > 0 THEN LEFT(split.value, CHARINDEX('-', split.value) - 1) ELSE split.value END = R.Funcional
+            WHERE C.NomeCertificado = @certificadoNome OR @arn = C.ArnCertificado;
 GROUP BY
     C.NomeCertificado, C.Ambiente;
