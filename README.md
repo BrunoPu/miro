@@ -1,7 +1,7 @@
-INSERT INTO TBAnalistacertificadosAMSLegado (idCertificado, AnalistaFuncional, AnalistaNome)
-SELECT @id, 
-       CASE WHEN CHARINDEX('-', split.value) > 0 THEN LEFT(split.value, CHARINDEX('-', split.value) - 1) ELSE split.value END AS Funcional,
-       R.Responsavel -- Usando o nome retornado diretamente de TBFilaCertificadosAWSmanual
-FROM STRING_SPLIT(@Responsaveis, ',') AS split
-LEFT JOIN TBFilaCertificadosAWSmanual R ON CASE WHEN CHARINDEX('-', split.value) > 0 THEN LEFT(split.value, CHARINDEX('-', split.value) - 1) ELSE split.value END = R.Funcional
-WHERE (R.NomeCertificado = @certificadoNome OR @arn = R.ArnCertificado) AND R.Responsavel IS NOT NULL;
+SELECT @id,
+                   LEFT(SUBSTRING_INDEX(split.value, '-', 1), CHARINDEX('-', split.value + '-') - 1) AS AnalistaFuncional,
+                   SUBSTRING_INDEX(split.value, '-', -1) AS AnalistaNome
+            FROM TBFilaCertificadosAWSmanual AS C
+            CROSS APPLY STRING_SPLIT(C.Responsavel, ',') AS split
+            WHERE (C.NomeCertificado = @certificadoNome OR @arn = C.ArnCertificado) AND split.value IS NOT NULL;
+        END;
