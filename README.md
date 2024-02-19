@@ -1,7 +1,6 @@
-SELECT @id,
-                   LEFT(split.value, CHARINDEX('-', split.value) - 1) AS AnalistaFuncional,
-                   RIGHT(split.value, LEN(split.value) - CHARINDEX('-', split.value)) AS AnalistaNome
-            FROM TBFilaCertificadosAWSmanual AS C
-            CROSS APPLY STRING_SPLIT(C.Responsavel, ',') AS split
-            WHERE (C.NomeCertificado = @certificadoNome OR @arn = C.ArnCertificado) AND split.value IS NOT NULL;
+INSERT INTO #TempResponsaveis (idCertificado, AnalistaFuncional)
+SELECT idCertificado,
+       LEFT(value, CHARINDEX('-', value) - 1) AS AnalistaFuncional
+FROM YourTableName -- Substitua "YourTableName" pelo nome correto da sua tabela
+CROSS APPLY STRING_SPLIT(responsavel, ',');
         
