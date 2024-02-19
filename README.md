@@ -1,11 +1,25 @@
-DECLARE @squad varchar(max)
+DECLARE @responsavel TABLE (
+    idcertificado INT,
+    AnalistaFuncional VARCHAR(MAX),
+    AnalistaNome VARCHAR(300),
+    dtcadastro DATE
+)
 
-SELECT @squad = GrupodeSuporte
+INSERT INTO @responsavel (idcertificado, AnalistaFuncional, AnalistaNome)
+SELECT
+    C.id,
+    Funcional,
+    R.Nome
 FROM (
-    SELECT DISTINCT TOP(1) GrupodeSuporte
-    FROM @tblegado L
-    INNER JOIN TBContasAWS Con ON C.IDconta = L.accountId
-    INNER JOIN TBReflector R ON R.Squad = Con.GrupodeSuporte
-) AS Subquery;
-
--- Agora você pode usar a variável @squad conforme necessário
+    SELECT DISTINCT
+        C.id,
+        CASE WHEN CHARINDEX('-', split.value) > 0 THEN LEFT(split.value, CHARINDEX('-', split.value) - 1) ELSE split.value END AS Funcional
+    FROM
+        TBCertificados AWSAPI C (NOLOCK)
+    CROSS APPLY
+        STRING_SPLIT(C.analista_funcional, ',') AS split
+    WHERE
+        @nome = C.nome
+) AS Funcionais
+LEFT JOIN
+    TBReflector R ON Funcionais.Funcional = R.Funcional
