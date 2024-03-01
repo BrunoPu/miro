@@ -9,9 +9,22 @@ DELETE FROM CertificadosDuplicados
 WHERE row_num > 1;
 
 -- Passo 3: Identificar IDs dos registros excluídos na tabela de certificados
+CREATE TABLE #IdsExcluidos (
+    id INT
+);
+
+INSERT INTO #IdsExcluidos (id)
 SELECT id
-INTO #IdsExcluidos
-FROM CertificadosDuplicados;
+FROM (
+    SELECT id
+    FROM certificados
+    WHERE (nomecertificado, arn) IN (
+        SELECT nomecertificado, arn
+        FROM certificados
+        GROUP BY nomecertificado, arn
+        HAVING COUNT(*) > 1
+    )
+) AS CertificadosDuplicados;
 
 -- Passo 4: Excluir registros correspondentes na tabela de responsáveis de certificados
 DELETE FROM responsavel_certificados
