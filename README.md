@@ -1,8 +1,7 @@
-import unittest
 
-class TestPassing(unittest.TestCase):
-    def test_always_passes(self):
-        self.assertEqual(1, 1)
+from pyspark.sql import SparkSession
 
-if __name__ == '__main__':
-    unittest.main()
+spark = SparkSession.builder \
+    .appName("MySparkApp") \
+    .config("spark.sql.broadcastTimeout", "-1") \
+    .getOrCreate()
