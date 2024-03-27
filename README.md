@@ -1,11 +1,8 @@
 from datetime import datetime
 from pyspark.context import SparkContext
 from awsglue.context import GlueContext
-from pyspark.sql import SparkSession
 from awsglue.job import Job
 from awsglue.dynamicframe import DynamicFrame
-from pyspark.sql.functions import col
-from pyspark.sql.functions import max
 import sys
 
 # Função para executar uma consulta SQL no Spark e retornar um DynamicFrame
@@ -21,7 +18,7 @@ glueContext = GlueContext(sc)
 spark = glueContext.spark_session
 
 # Inicializa o job Glue
-args = getResolvedOptions(sys.argv, ["JOB_NAME"])
+args = glueContext.getResolvedOptions(sys.argv, ["JOB_NAME"])
 job = Job(glueContext)
 job.init(args['JOB_NAME'], args)
 
