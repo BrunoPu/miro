@@ -1,28 +1,24 @@
-import boto3
+import requests
 
-# Configure as credenciais manualmente
-aws_access_key_id = 'SEU_ACCESS_KEY_ID'
-aws_secret_access_key = 'SEU_SECRET_ACCESS_KEY'
-aws_default_region = 'sua_regiao'
-aws_session_token = 'SEU_SESSION_TOKEN'  # Opcional, dependendo das suas credenciais
+# Função para chamar a API e obter o JSON
+def chamar_api():
+    url = "URL_DA_API_AQUI"
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print("Erro ao chamar a API:", response.status_code)
+        return None
 
-# Endpoint personalizado
-endpoint_url = 'https://Backet.vpce-134133'
+# Chama a função para obter o JSON
+json_data = chamar_api()
 
-# Crie um cliente S3 com as credenciais configuradas manualmente e o endpoint personalizado
-s3 = boto3.client('s3', 
-                  aws_access_key_id=aws_access_key_id, 
-                  aws_secret_access_key=aws_secret_access_key, 
-                  region_name=aws_default_region,
-                  aws_session_token=aws_session_token,
-                  endpoint_url=endpoint_url)
+# Verifica se o JSON foi obtido com sucesso
+if json_data:
+    # Obtém os valores de access_key e token
+    access_key = json_data["data"]["access_key"]
+    token = json_data["data"]["token"]
 
-# Nome do bucket
-bucket_name = 'meubucket'
-
-# Liste os objetos no bucket usando o endpoint personalizado
-response = s3.list_objects(Bucket=bucket_name)
-
-# Imprima os nomes dos objetos
-for obj in response.get('Contents', []):
-    print(obj['Key'])
+    # Você pode então usar as variáveis conforme necessário
+    print("Access Key:", access_key)
+    print("Token:", token)
