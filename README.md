@@ -1,24 +1,18 @@
-import requests
+import subprocess
 
-# Função para chamar a API e obter o JSON
-def chamar_api():
-    url = "URL_DA_API_AQUI"
-    response = requests.get(url)
-    if response.status_code == 200:
-        return response.json()
-    else:
-        print("Erro ao chamar a API:", response.status_code)
-        return None
+# Configuração das credenciais
+aws_access_key_id = 'SEU_ACCESS_KEY_ID'
+aws_secret_access_key = 'SEU_SECRET_ACCESS_KEY'
+aws_default_region = 'sua_regiao'
 
-# Chama a função para obter o JSON
-json_data = chamar_api()
+# Endpoint personalizado
+endpoint_url = 'https://Backet.vpce-134133'
 
-# Verifica se o JSON foi obtido com sucesso
-if json_data:
-    # Obtém os valores de access_key e token
-    access_key = json_data["data"]["access_key"]
-    token = json_data["data"]["token"]
+# Comando AWS CLI para listar objetos no bucket com endpoint personalizado
+command = f"aws s3 ls s3://{bucket_name}/ --endpoint-url {endpoint_url} --region {aws_default_region} --access-key-id {aws_access_key_id} --secret-access-key {aws_secret_access_key}"
 
-    # Você pode então usar as variáveis conforme necessário
-    print("Access Key:", access_key)
-    print("Token:", token)
+# Executar o comando e capturar a saída
+output = subprocess.run(command, shell=True, capture_output=True, text=True)
+
+# Imprimir a saída
+print(output.stdout)
