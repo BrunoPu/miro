@@ -1,28 +1,21 @@
-import boto3
+import subprocess  # Importa o módulo subprocess para executar comandos do sistema
 
-# Configure as credenciais manualmente
-aws_access_key_id = 'SEU_ACCESS_KEY_ID'
-aws_secret_access_key = 'SEU_SECRET_ACCESS_KEY'
-aws_default_region = 'sua_regiao'
-aws_session_token = 'SEU_SESSION_TOKEN'  # Opcional, dependendo das suas credenciais
+def run_aws_command(command):
+    # Executa o comando AWS CLI como um subprocesso
+    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    # Captura a saída e os erros do subprocesso
+    output, error = process.communicate()
+    # Retorna a saída e os erros
+    return output, error
 
-# Endpoint personalizado
-endpoint_url = 'https://Backet.vpce-134133'
+# Comando AWS CLI desejado
+command = "aws s3 ls s3://meus3 --endpoint-url HTTPS://meuendpint"
+# Executa o comando AWS usando a função definida anteriormente
+output, error = run_aws_command(command)
 
-# Crie um cliente S3 com as credenciais configuradas manualmente e o endpoint personalizado
-s3 = boto3.client('s3', 
-                  aws_access_key_id=aws_access_key_id, 
-                  aws_secret_access_key=aws_secret_access_key, 
-                  region_name=aws_default_region,
-                  aws_session_token=aws_session_token,
-                  endpoint_url=endpoint_url)
-
-# Nome do bucket
-bucket_name = 'meubucket'
-
-# Liste os objetos no bucket usando o endpoint personalizado
-response = s3.list_objects(Bucket=bucket_name)
-
-# Imprima os nomes dos objetos
-for obj in response.get('Contents', []):
-    print(obj['Key'])
+if error:
+    # Se houver erro, imprime o erro decodificado
+    print("Ocorreu um erro:", error.decode("utf-8"))
+else:
+    # Se não houver erro, imprime a saída decodificada do comando AWS
+    print("Saída do comando AWS CLI:", output.decode("utf-8"))
