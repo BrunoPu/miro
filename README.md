@@ -1,6 +1,10 @@
-import subprocess  # Importa o módulo subprocess para executar comandos do sistema
+import subprocess
+import os  # Importa o módulo os para configurar variáveis de ambiente
 
 def run_aws_command(command):
+    # Define a variável de ambiente AWS_ACCESS_KEY_ID
+    os.environ["AWS_ACCESS_KEY_ID"] = "jdjsjdbdhdb"  # Define a ID da chave de acesso
+    os.environ["AWS_SECRET_ACCESS_KEY"] = "hsjsjdhsjdb"  # Define a chave de acesso
     # Executa o comando AWS CLI como um subprocesso
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     # Captura a saída e os erros do subprocesso
