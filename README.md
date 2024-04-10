@@ -1,19 +1,17 @@
-WITH CertificadoResponsaveis AS (
-    SELECT 
-        c.idcertificado,
-        rc.funcional,
-        rc.nome_analista,
-        ROW_NUMBER() OVER (PARTITION BY c.idcertificado ORDER BY rc.funcional) AS rank
-    FROM 
-        certificado c
-    INNER JOIN 
-        responsavelcertificado rc ON c.idcertificado = rc.idcertificado
-)
 SELECT 
-    idcertificado,
-    funcional,
-    nome_analista
+    c.idcertificado,
+    rc.funcional,
+    rc.nome_analista
 FROM 
-    CertificadoResponsaveis
-WHERE 
-    rank <= 5;
+    certificado c
+OUTER APPLY (
+    SELECT TOP 5
+        rc.funcional,
+        rc.nome_analista
+    FROM 
+        responsavelcertificado rc
+    WHERE 
+        rc.idcertificado = c.idcertificado
+    ORDER BY 
+        rc.funcional
+) AS rc;
