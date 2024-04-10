@@ -1,17 +1,10 @@
 SELECT 
     c.idcertificado,
-    rc.funcional,
-    rc.nome_analista
+    c.nome,
+    c.numero_serie
 FROM 
     certificado c
-OUTER APPLY (
-    SELECT TOP 5
-        rc.funcional,
-        rc.nome_analista
-    FROM 
-        responsavelcertificado rc
-    WHERE 
-        rc.idcertificado = c.idcertificado
-    ORDER BY 
-        rc.funcional
-) AS rc;
+LEFT JOIN 
+    responsavelcertificado rc ON c.idcertificado = rc.idcertificado
+WHERE 
+    rc.idcertificado IS NULL;
