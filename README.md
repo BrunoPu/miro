@@ -1,16 +1,16 @@
-# Arquivo main.tf dentro do módulo "glue_schedule"
+#!/bin/bash
 
-provider "aws" {
-  region = "sua-regiao"
-}
+# Verifica se o processo está em execução
+if ! lsof -i :5000 > /dev/null; then
+    # Se não estiver em execução, inicie o processo
+    nohup python3 sua_aplicacao.py &
 
-resource "aws_glue_trigger" "schedule" {
-  name         = "seu-schedule"
-  type         = "SCHEDULED"
-  schedule     = "cron(30 9 ? * MON,WED *)"  # Roda toda semana às segundas e quartas às 9h30 da manhã
-  workflow_name = "seu-glue-job"  # Nome do job existente
+    # Aguarde um momento para o processo iniciar
+    sleep 5
 
-  actions {
-    job_name = "seu-glue-job"
-  }
-}
+    # Verifique novamente se o processo está em execução
+    if ! lsof -i :5000 > /dev/null; then
+        echo "O processo não foi iniciado corretamente."
+        exit 1
+    fi
+fi
