@@ -1,21 +1,41 @@
-#!/bin/bash
+using System;
+using System.Configuration; // Para acessar o arquivo de configuração web.conf
+using System.Data;
+using System.Data.SqlClient; // Para trabalhar com SQL Server
+using System.IO;
 
-# Obtenha a data de ontem
-yesterday=$(date -d "yesterday" "+%Y-%m-%d")
+public class JsonToDatabase
+{
+    public void InserirDadosDoJson()
+    {
+        string caminhoArquivoJson = "caminho/do/arquivo.json"; // Substitua pelo caminho real do seu arquivo JSON
 
-# Verifique se o processo está em execução na porta 5001
-if lsof -i :5001 -P -sTCP:LISTEN | grep "(LISTEN)"; then
-    echo "O processo na porta 5001 está em execução."
-else
-    # Se não estiver em execução, inicie o processo
-    nohup python3 sua_aplicacao.py &
-    sleep 5
+        // Ler o arquivo JSON
+        string[] linhas = File.ReadAllLines(caminhoArquivoJson);
 
-    # Verifique novamente se o processo está em execução
-    if lsof -i :5001 -P -sTCP:LISTEN | grep "(LISTEN)"; then
-        echo "O processo foi iniciado com sucesso."
-    else
-        echo "Erro ao iniciar o processo."
-        exit 1
-    fi
-fi
+        // Conexão com o banco de dados
+        string connectionString = ConfigurationManager.ConnectionStrings["NomeDaSuaConexao"].ConnectionString;
+        
+        using (SqlConnection conexao = new SqlConnection(connectionString))
+        {
+            // Abre a conexão
+            conexao.Open();
+
+            foreach (string linha in linhas)
+            {
+                // Convertendo a linha JSON para um objeto C#
+                var objetoJson = Newtonsoft.Json.JsonConvert.DeserializeObject<dynamic>(linha);
+
+                // Chamando a procedure para inserir os dados
+                using (SqlCommand comando = new SqlCommand("NomeDaSuaProcedure", conexao))
+                {
+                    comando.CommandType = CommandType.StoredProcedure;
+                    comando.Parameters.Add("@Nome", SqlDbType.NVarChar).Value = objetoJson.Nome;
+                    comando.Parameters.Add("@Funcional", SqlDbType.NVarChar).Value = objetoJson.Funcional;
+
+                    comando.ExecuteNonQuery();
+                }
+            }
+        }
+    }
+}
