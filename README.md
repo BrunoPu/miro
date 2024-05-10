@@ -1,41 +1,19 @@
-using System;
-using System.Configuration; // Para acessar o arquivo de configuração web.conf
-using System.Data;
-using System.Data.SqlClient; // Para trabalhar com SQL Server
-using System.IO;
+@echo off
+set origem1=\\caminho\para\origem\arquivo1.txt
+set origem2=\\caminho\para\origem\arquivo2.txt
+set destino=\\caminho\para\destino
 
-public class JsonToDatabase
-{
-    public void InserirDadosDoJson()
-    {
-        string caminhoArquivoJson = "caminho/do/arquivo.json"; // Substitua pelo caminho real do seu arquivo JSON
+echo Verificando se ambos os arquivos existem...
+if exist "%origem1%" (
+    if exist "%origem2%" (
+        echo Movendo ambos os arquivos...
+        move /Y "%origem1%" "%destino%"
+        move /Y "%origem2%" "%destino%"
+    ) else (
+        echo O arquivo2.txt não foi encontrado na pasta de origem.
+    )
+) else (
+    echo O arquivo1.txt não foi encontrado na pasta de origem.
+)
 
-        // Ler o arquivo JSON
-        string[] linhas = File.ReadAllLines(caminhoArquivoJson);
-
-        // Conexão com o banco de dados
-        string connectionString = ConfigurationManager.ConnectionStrings["NomeDaSuaConexao"].ConnectionString;
-        
-        using (SqlConnection conexao = new SqlConnection(connectionString))
-        {
-            // Abre a conexão
-            conexao.Open();
-
-            foreach (string linha in linhas)
-            {
-                // Convertendo a linha JSON para um objeto C#
-                var objetoJson = Newtonsoft.Json.JsonConvert.DeserializeObject<dynamic>(linha);
-
-                // Chamando a procedure para inserir os dados
-                using (SqlCommand comando = new SqlCommand("NomeDaSuaProcedure", conexao))
-                {
-                    comando.CommandType = CommandType.StoredProcedure;
-                    comando.Parameters.Add("@Nome", SqlDbType.NVarChar).Value = objetoJson.Nome;
-                    comando.Parameters.Add("@Funcional", SqlDbType.NVarChar).Value = objetoJson.Funcional;
-
-                    comando.ExecuteNonQuery();
-                }
-            }
-        }
-    }
-}
+echo Processo concluído.
