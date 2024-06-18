@@ -1,17 +1,31 @@
-int year = 2024;
-int month = 5;
-int day = 2;
+using System;
 
-// Criar uma string no formato "YYYY-MM-DD"
-string dataString = $"{year}-{month:00}-{day:00}";
+class Program
+{
+    static void Main()
+    {
+        int year = 2024;
+        int month = 5;
+        int day = 2;
 
-// Converter a string para um objeto DateTime
-DateTime data;
-if (DateTime.TryParse(dataString, out data))
-{
-    Console.WriteLine($"Data formatada: {data.ToString("yyyy-MM-dd")}");
-}
-else
-{
-    Console.WriteLine("Não foi possível converter para data válida.");
+        // Formatar month e day com dois dígitos
+        string formattedMonth = month.ToString("00");
+        string formattedDay = day.ToString("00");
+
+        // Concatenar as partes formatadas para formar a data no formato "YYYY-MM-DD"
+        string dataString = $"{year}-{formattedMonth}-{formattedDay}";
+
+        Console.WriteLine($"Data formatada: {dataString}");
+
+        // Converter a string diretamente para um objeto DateTime
+        DateTime data;
+        if (DateTime.TryParseExact(dataString, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out data))
+        {
+            Console.WriteLine($"Data convertida: {data}");
+        }
+        else
+        {
+            Console.WriteLine("Erro ao converter para data válida.");
+        }
+    }
 }
