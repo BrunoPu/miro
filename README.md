@@ -1,6 +1,8 @@
-SELECT active, name, parent, sys_id, CONCAT(year, '-', month, '-', day) AS date
+SELECT active, name, parent, sys_id, year, month, day
 FROM sys_user_group_sot
-WHERE CONCAT(year, '-', month, '-', day) = (
-    SELECT MAX(CONCAT(year, '-', month, '-', day))
+WHERE (year, month, day) = (
+    SELECT year, month, day
     FROM sys_user_group_sot
+    ORDER BY year DESC, month DESC, day DESC
+    LIMIT 1
 );
