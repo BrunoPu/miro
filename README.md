@@ -1,17 +1,17 @@
-WITH latest_date AS (
-    SELECT MAX(CONCAT(year, '-', LPAD(month, 2, '0'), '-', LPAD(day, 2, '0'))) AS max_date
-    FROM sys_user_group_sot
-)
-SELECT active, name, parent, sys_id, year, month, day
-FROM sys_user_group_sot
-WHERE CONCAT(year, '-', LPAD(month, 2, '0'), '-', LPAD(day, 2, '0')) = (
-    SELECT max_date FROM latest_date
-);
+int year = 2024;
+int month = 5;
+int day = 2;
 
+// Criar uma string no formato "YYYY-MM-DD"
+string dataString = $"{year}-{month:00}-{day:00}";
 
-SELECT active, name, parent, sys_id, CONCAT(year, '-', month, '-', day) AS date
-FROM sys_user_group_sot
-WHERE CONCAT(year, '-', month, '-', day) = (
-    SELECT MAX(CONCAT(year, '-', month, '-', day))
-    FROM sys_user_group_sot
-);
+// Converter a string para um objeto DateTime
+DateTime data;
+if (DateTime.TryParse(dataString, out data))
+{
+    Console.WriteLine($"Data formatada: {data.ToString("yyyy-MM-dd")}");
+}
+else
+{
+    Console.WriteLine("Não foi possível converter para data válida.");
+}
