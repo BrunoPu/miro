@@ -1,13 +1,11 @@
-WITH LatestRecords AS (
-    SELECT 
-        *,
-        ROW_NUMBER() OVER (PARTITION BY GroupID ORDER BY UpdateDate DESC) AS rn
-    FROM 
-        YourTable
-)
+INSERT INTO TargetTable (col1, col2, ..., colN) -- lista todas as colunas necessárias para inserção
 SELECT 
-    *
-FROM 
-    LatestRecords
-WHERE 
-    rn = 1;
+    col1, col2, ..., colN
+FROM (
+    SELECT 
+        col1, col2, ..., colN,
+        ROW_NUMBER() OVER (PARTITION BY SupportGroupID ORDER BY UpdateDate DESC) AS rn
+    FROM 
+        SourceTable
+) AS RecentRecords
+WHERE rn = 1;
