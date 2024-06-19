@@ -29,3 +29,19 @@ class Program
         }
     }
 }
+
+
+
+SELECT 
+    *
+FROM 
+    SuaTabela T
+WHERE 
+    DataAtualizacao = (
+        SELECT 
+            MAX(DataAtualizacao)
+        FROM 
+            SuaTabela
+        WHERE 
+            GrupoID = T.GrupoID
+    );
