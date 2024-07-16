@@ -81,7 +81,7 @@ job.commit()
 
 
 --_---------------
-CREATE VIEW NomeDaSuaView AS
+ CREATE VIEW NomeDaSuaView AS
 SELECT
     Id,
     NomeCertificado,
@@ -95,28 +95,28 @@ SELECT
     CAInternaExterna,
     Balanceador,
     Sigla,
-    Ltrim(CASE WHEN (SELECT DISTINCT identificado FROM TBCertificadosAnalistas (NOLOCK) A WHERE A.idCertificado = C.id) IS NULL THEN (AnalistaNome) ELSE (SELECT DISTINCT SUBSTRING(
+    LTRIM(CASE WHEN (SELECT DISTINCT identificado FROM tbCertificadosAnalistas (NOLOCK) A WHERE A.idCertificado = C.id) IS NULL THEN (AnalistaNome) ELSE (SELECT DISTINCT SUBSTRING(
         (SELECT TOP 1 AnalistaFuncional
         FROM TBCertificadosAnalistas (NOLOCK) P
         WHERE P.idCertificado = C2.idCertificado
         FOR XML PATH ('')), 1, 1000) AnalistaFuncional
         FROM TBCertificadosAnalistas (NOLOCK) C2
         WHERE C2.idCertificado = C.id) END) AS [AnalistaFuncional],
-    Ltrim(CASE WHEN (SELECT DISTINCT identificado FROM TBCertificadosAnalistas (NOLOCK) A WHERE A.idCertificado = C.id) IS NULL THEN (AnalistaNome) ELSE (SELECT DISTINCT SUBSTRING(
+    LTRIM(CASE WHEN (SELECT DISTINCT identificado FROM tbCertificadosAnalistas (NOLOCK) A WHERE A.idCertificado = C.id) IS NULL THEN (AnalistaNome) ELSE (SELECT DISTINCT SUBSTRING(
         (SELECT TOP 1 AnalistaFuncional
         FROM TBCertificadosAnalistas (NOLOCK) P
         WHERE P.idCertificado = C2.idCertificado
         FOR XML PATH ('')), 1, 1000) Nomes
         FROM TBCertificadosAnalistas (NOLOCK) C2
         WHERE C2.idCertificado = C.id) END) AS [AnalistaNome],
-    Ltrim((SELECT DISTINCT SUBSTRING(
+    LTRIM((SELECT DISTINCT SUBSTRING(
         (SELECT TOP 1 Nomes
         FROM TBCertificadosSquad (NOLOCK) P
         WHERE P.idCertificado = C2.idCertificado
         FOR XML PATH ('')), 1, 1000) Nomes
         FROM TBCertificadosSquad (NOLOCK) C2
         WHERE C2.idCertificado = C.id)) AS Squad,
-    Ltrim((SELECT DISTINCT SUBSTRING(
+    LTRIM((SELECT DISTINCT SUBSTRING(
         (SELECT TOP 1 Nomes
         FROM TBCertificadosComunidade (NOLOCK) P
         WHERE P.idCertificado = C2.idCertificado
