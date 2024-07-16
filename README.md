@@ -78,3 +78,64 @@ write_to_glue_catalog(df, glue_database_name, glue_table_name)
 
 # Finaliza o job do Glue
 job.commit()
+
+
+--_---------------
+CREATE VIEW NomeDaSuaView AS
+SELECT
+    Id,
+    NomeCertificado,
+    NumeroSerie,
+    MultidominioSAN,
+    Extensao,
+    Ambiente,
+    dtEmissao,
+    dtVencimento,
+    Status,
+    CAInternaExterna,
+    Balanceador,
+    Sigla,
+    Ltrim(CASE WHEN (SELECT DISTINCT identificado FROM TBCertificadosAnalistas (NOLOCK) A WHERE A.idCertificado = C.id) IS NULL THEN (AnalistaNome) ELSE (SELECT DISTINCT SUBSTRING(
+        (SELECT TOP 1 AnalistaFuncional
+        FROM TBCertificadosAnalistas (NOLOCK) P
+        WHERE P.idCertificado = C2.idCertificado
+        FOR XML PATH ('')), 1, 1000) AnalistaFuncional
+        FROM TBCertificadosAnalistas (NOLOCK) C2
+        WHERE C2.idCertificado = C.id) END) AS [AnalistaFuncional],
+    Ltrim(CASE WHEN (SELECT DISTINCT identificado FROM TBCertificadosAnalistas (NOLOCK) A WHERE A.idCertificado = C.id) IS NULL THEN (AnalistaNome) ELSE (SELECT DISTINCT SUBSTRING(
+        (SELECT TOP 1 AnalistaFuncional
+        FROM TBCertificadosAnalistas (NOLOCK) P
+        WHERE P.idCertificado = C2.idCertificado
+        FOR XML PATH ('')), 1, 1000) Nomes
+        FROM TBCertificadosAnalistas (NOLOCK) C2
+        WHERE C2.idCertificado = C.id) END) AS [AnalistaNome],
+    Ltrim((SELECT DISTINCT SUBSTRING(
+        (SELECT TOP 1 Nomes
+        FROM TBCertificadosSquad (NOLOCK) P
+        WHERE P.idCertificado = C2.idCertificado
+        FOR XML PATH ('')), 1, 1000) Nomes
+        FROM TBCertificadosSquad (NOLOCK) C2
+        WHERE C2.idCertificado = C.id)) AS Squad,
+    Ltrim((SELECT DISTINCT SUBSTRING(
+        (SELECT TOP 1 Nomes
+        FROM TBCertificadosComunidade (NOLOCK) P
+        WHERE P.idCertificado = C2.idCertificado
+        FOR XML PATH ('')), 1, 1000) Nomes
+        FROM TBCertificadosComunidade (NOLOCK) C2
+        WHERE C2.idCertificado = C.id)) AS Comunidade,
+    Aplicacao,
+    (SELECT DISTINCT SUBSTRING(
+        (SELECT TOP 1 P.DescricaoEmissor
+        FROM TBCertificadosEmissor (NOLOCK) P
+        WHERE P.idEmissor = C2.idEmissor
+        FOR XML PATH ('')), 1, 1000) Nomes
+        FROM TBCertificadosEmissor (NOLOCK) C2
+        WHERE C2.idEmissor = C.idEmissor) AS Emissor,
+    SG.name,
+    C.SupportGroup_sys_id,
+    Servidores
+FROM
+    TBCertificados C (NOLOCK)
+    LEFT JOIN TBSupportGroup SG (NOLOCK) ON SG.SYS_id = C.SupportGroup_sys_id
+ORDER BY
+    dtVencimento;
