@@ -1,31 +1,80 @@
-Entendi, aqui está a versão ajustada:
+import json
+from pyspark.sql import SparkSession, DataFrame
+from awsglue.context import GlueContext
+from awsglue.dynamicframe import DynamicFrame
+from awsglue.utils import getResolvedOptions
+from awsglue.jobs import Job
+import os
+import sys
 
----
+# Obtenha os parâmetros de entrada do job
+args = getResolvedOptions(sys.argv, ['JOB_NAME'])
 
-**Assunto: Conclusão da Migração de Consumo de Dados – Agradecimentos**
+# Inicialize a SparkSession
+spark = SparkSession.builder.getOrCreate()
 
-Olá equipe,
+# Inicialize o GlueContext
+glueContext = GlueContext(spark)
+spark = glueContext.spark_session
 
-Espero que estejam todos bem.
+# Inicialize o job do Glue
+job = Job(glueContext)
+job.init(args['JOB_NAME'], args)
 
-É com grande satisfação que informo que concluímos com sucesso a migração do consumo de dados! Realizamos a transição do antigo sistema Refletor para o novo banco de dados Data Mash, garantindo assim a atualização contínua e a qualidade do atendimento ao usuário.
+def str_to_list_of_dicts(data_str):
+    """
+    Converte uma string para um array de dicionários
+    """
+    data_str = data_str.replace("\'", "\"")  # Substitui apóstrofos por aspas duplas
+    return json.loads(data_str)  # Converte a string JSON para uma lista de dicionários
 
-Superamos desafios significativos ao longo do processo, graças à nossa perseverança e trabalho em equipe. Asseguramos que a plataforma EK8 esteja sempre atualizada com todas as informações dos grupos de suporte e funcionários, proporcionando um ambiente operacional eficiente.
+def get_table_from_connector(db_host: str, db_name: str, arn_username: str, arn_pwd: str, table_name: str, db_port: str) -> DataFrame:
+    """
+    Conecta ao banco de dados SQL Server e retorna uma tabela como DataFrame do Spark
+    """
+    # Define os parâmetros JDBC para a conexão com o SQL Server
+    jdbc_parameters = {
+        "url": f"jdbc:sqlserver://{db_host}:{db_port};databaseName={db_name}",
+        "driver": "com.microsoft.sqlserver.jdbc.SQLServerDriver",
+        "user": arn_username,
+        "password": arn_pwd
+    }
 
-A precisão e eficácia na gestão desses dados são cruciais para o inventário e administração dos certificados. Agradeço a todos pela atenção dedicada às evidências necessárias.
+    # Conecta ao banco de dados e lê a tabela como um DataFrame do Spark
+    df = spark.read.format("jdbc").options(**jdbc_parameters).option("dbtable", table_name).load()
+    return df
 
-Quero expressar meu sincero agradecimento a cada um que contribuiu para o sucesso deste projeto. O profissionalismo e dedicação de vocês foram fundamentais para alcançarmos este resultado.
+def write_to_glue_catalog(df: DataFrame, database_name: str, table_name: str):
+    """
+    Escreve um DataFrame no Glue Data Catalog como um DynamicFrame
+    """
+    # Converte o DataFrame do Spark para um DynamicFrame do Glue
+    dynamic_frame = DynamicFrame.fromDF(df, glueContext, "dynamic_frame")
+    
+    # Escreve o DynamicFrame no Glue Data Catalog
+    glueContext.write_dynamic_frame.from_catalog(
+        frame=dynamic_frame,
+        database=database_name,
+        table_name=table_name
+    )
 
-Por favor, se tiverem alguma dúvida ou necessidade de esclarecimento adicional, não hesitem em entrar em contato.
+# Defina as variáveis necessárias para a conexão e obtenção da tabela
+db_host = os.getenv("db_host")  # Substitua por seu valor real ou use variáveis de ambiente
+db_name = os.getenv("db_name")  # Substitua por seu valor real ou use variáveis de ambiente
+arn_username = os.getenv("arn_username")  # Substitua por seu valor real ou use variáveis de ambiente
+arn_pwd = os.getenv("arn_pwd")  # Substitua por seu valor real ou use variáveis de ambiente
+table_name = os.getenv("table_name")  # Substitua por seu valor real ou use variáveis de ambiente
+db_port = os.getenv("db_port")  # Substitua por seu valor real ou use variáveis de ambiente
 
-Mais uma vez, obrigado pelo excelente trabalho de todos.
+# Obtenha a tabela do banco de dados como um DataFrame do Spark
+df = get_table_from_connector(db_host, db_name, arn_username, arn_pwd, table_name, db_port)
 
-Atenciosamente,
+# Especifica o nome do database e da tabela no Glue Data Catalog
+glue_database_name = "your_glue_database_name"  # Substitua pelo nome do database no Glue Data Catalog
+glue_table_name = "your_glue_table_name"  # Substitua pelo nome da tabela no Glue Data Catalog
 
-[Seu Nome]  
-[Seu Cargo]  
-[Seu Contato]
+# Escreve o DataFrame no Glue Data Catalog
+write_to_glue_catalog(df, glue_database_name, glue_table_name)
 
----
-
-Espero que esta versão esteja mais clara e alinhada com o que você deseja comunicar. Se precisar de mais ajustes ou tiver outras sugestões, estou à disposição para ajudar!
+# Finaliza o job do Glue
+job.commit()
