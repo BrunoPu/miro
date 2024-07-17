@@ -34,14 +34,19 @@ def get_table_from_connector(db_host: str, db_name: str, arn_username: str, arn_
     """
     # Parâmetros JDBC para a conexão com o SQL Server
     jdbc_parameters = {
-        "url": f"jdbc:sqlserver://{db_host}:{db_port};databaseName={db_name}",
         "driver": "com.microsoft.sqlserver.jdbc.SQLServerDriver",
-        "user": arn_username,
-        "password": arn_pwd
+        "connection_string": f"jdbc:sqlserver://{db_host}:{db_port};databaseName={db_name}",
+        "auth": {
+            "aut_type": "secrets_manager",
+            "user": arn_username,
+            "password": arn_pwd
+        }
     }
-
+    
     # Conecta ao banco de dados e lê a tabela como um DataFrame do Spark
-    df = spark.read.format("jdbc").options(**jdbc_parameters).option("dbtable", table_name).load()
+    jdbc = spark.get_jdbc_connector(jdbc_parameters=jdbc_parameters)
+    sql = f"SELECT * FROM {table_name}"
+    df = jdbc.get_sql_to_df(sql=sql)
     return df
 
 def write_to_glue_catalog(df: DataFrame, database_name: str, table_name: str):
@@ -83,15 +88,11 @@ arn_pwd = os.getenv("arn_pwd")  # Substitua por seu valor real ou use variáveis
 table_name = os.getenv("table_name")  # Substitua por seu valor real ou use variáveis de ambiente
 db_port = os.getenv("db_port")  # Substitua por seu valor real ou use variáveis de ambiente
 
-# Obtenha a tabela do banco de dados como um DataFrame do Spark
+# Obtém a tabela do conector
 df = get_table_from_connector(db_host, db_name, arn_username, arn_pwd, table_name, db_port)
 
-# Especifica o nome do database e da tabela no Glue Data Catalog
-glue_database_name = "your_glue_database_name"  # Substitua pelo nome do database no Glue Data Catalog
-glue_table_name = "your_glue_table_name"  # Substitua pelo nome da tabela no Glue Data Catalog
+# Escreve a tabela no Glue Data Catalog
+write_to_glue_catalog(df, db_name, table_name)
 
-# Escreve o DataFrame no Glue Data Catalog
-write_to_glue_catalog(df, glue_database_name, glue_table_name)
-
-# Finaliza o job do Glue
+# Finaliza o job
 job.commit()
