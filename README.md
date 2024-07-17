@@ -1,17 +1,17 @@
 import json
-from pyspark.sql import SparkSession, DataFrame
+import os
+import sys
 from awsglue.context import GlueContext
 from awsglue.dynamicframe import DynamicFrame
 from awsglue.utils import getResolvedOptions
 from awsglue.jobs import Job
-import os
-import sys
+from itaudatautils.data_utils import DataUtils
 
 # Obtenha os parâmetros de entrada do job
 args = getResolvedOptions(sys.argv, ['JOB_NAME'])
 
-# Inicialize a SparkSession
-spark = SparkSession.builder.getOrCreate()
+# Inicialize o SparkSession usando DataUtils
+spark = DataUtils.get_spark()
 
 # Inicialize o GlueContext
 glueContext = GlueContext(spark)
@@ -59,7 +59,7 @@ def get_table_from_connector(db_host: str, db_name: str, arn_username: str, arn_
     df = jdbc.get_sql_to_df(sql=sql)
     return df
 
-def write_to_glue_catalog(df: DataFrame, database_name: str, glue_table_name: str):
+def write_to_glue_catalog(df: DataFrame, glue_database_name: str, glue_table_name: str):
     """
     Escreve um DataFrame no Glue Data Catalog como um DynamicFrame
     """
@@ -73,14 +73,14 @@ def write_to_glue_catalog(df: DataFrame, database_name: str, glue_table_name: st
     # Escreve o DynamicFrame no Glue Data Catalog
     glueContext.write_dynamic_frame.from_catalog(
         frame=dynamic_frame,
-        database=database_name,
-        table_name=glue_table_name
+        database=glue_database_name,  # Nome do banco de dados no Glue Data Catalog
+        table_name=glue_table_name    # Nome da tabela no Glue Data Catalog
     )
     
     # Ler o DynamicFrame de volta do Glue Data Catalog para verificação
     dynamic_frame_read = glueContext.create_dynamic_frame.from_catalog(
-        database=database_name,
-        table_name=glue_table_name
+        database=glue_database_name,  # Nome do banco de dados no Glue Data Catalog
+        table_name=glue_table_name    # Nome da tabela no Glue Data Catalog
     )
     
     # Converter DynamicFrame lido de volta para DataFrame
@@ -91,18 +91,21 @@ def write_to_glue_catalog(df: DataFrame, database_name: str, glue_table_name: st
     df_read.printSchema()
 
 # Defina as variáveis necessárias para a conexão e obtenção da tabela
-db_host = os.getenv("db_host")  # Substitua por seu valor real ou use variáveis de ambiente
-db_name = os.getenv("db_name")  # Substitua por seu valor real ou use variáveis de ambiente
-arn_username = os.getenv("arn_username")  # Substitua por seu valor real ou use variáveis de ambiente
-arn_pwd = os.getenv("arn_pwd")  # Substitua por seu valor real ou use variáveis de ambiente
-db_port = os.getenv("db_port")  # Substitua por seu valor real ou use variáveis de ambiente
-glue_table_name = os.getenv("glue_table_name")  # Substitua por seu valor real ou use variáveis de ambiente
+db_host = os.getenv("db_host")  # Host do banco de dados SQL Server
+db_name = os.getenv("db_name")  # Nome do banco de dados SQL Server
+arn_username = os.getenv("arn_username")  # Nome de usuário para autenticação
+arn_pwd = os.getenv("arn_pwd")  # Senha para autenticação
+db_port = os.getenv("db_port")  # Porta do banco de dados SQL Server
+
+# Defina as variáveis necessárias para a escrita no Glue Data Catalog
+glue_database_name = os.getenv("glue_database_name")  # Nome do banco de dados no Glue Data Catalog
+glue_table_name = os.getenv("glue_table_name")  # Nome da tabela no Glue Data Catalog
 
 # Obtém a tabela do conector
 df = get_table_from_connector(db_host, db_name, arn_username, arn_pwd, db_port)
 
 # Escreve a tabela no Glue Data Catalog
-write_to_glue_catalog(df, db_name, glue_table_name)
+write_to_glue_catalog(df, glue_database_name, glue_table_name)
 
 # Finaliza o job
 job.commit()
