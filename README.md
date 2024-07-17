@@ -28,7 +28,7 @@ def str_to_list_of_dicts(data_str):
     data_str = data_str.replace("\'", "\"")  # Substitui apóstrofos por aspas duplas
     return json.loads(data_str)  # Converte a string JSON para uma lista de dicionários
 
-def get_table_from_connector(db_host: str, db_name: str, arn_username: str, arn_pwd: str, table_name: str, db_port: str) -> DataFrame:
+def get_table_from_connector(db_host: str, db_name: str, arn_username: str, arn_pwd: str, db_port: str) -> DataFrame:
     """
     Conecta ao banco de dados SQL Server e retorna uma tabela como DataFrame do Spark
     """
@@ -45,11 +45,21 @@ def get_table_from_connector(db_host: str, db_name: str, arn_username: str, arn_
     
     # Conecta ao banco de dados e lê a tabela como um DataFrame do Spark
     jdbc = spark.get_jdbc_connector(jdbc_parameters=jdbc_parameters)
-    sql = f"SELECT * FROM {table_name}"
+    
+    # SQL complexo com várias condições e junções
+    sql = """
+    SELECT a.*, b.column1, c.column2
+    FROM some_table a
+    INNER JOIN another_table b ON a.id = b.id
+    LEFT JOIN yet_another_table c ON a.id = c.id
+    WHERE a.status = 'active' AND b.date > '2023-01-01'
+    """
+    
+    # Executa a consulta SQL e obtém o DataFrame
     df = jdbc.get_sql_to_df(sql=sql)
     return df
 
-def write_to_glue_catalog(df: DataFrame, database_name: str, table_name: str):
+def write_to_glue_catalog(df: DataFrame, database_name: str, glue_table_name: str):
     """
     Escreve um DataFrame no Glue Data Catalog como um DynamicFrame
     """
@@ -64,13 +74,13 @@ def write_to_glue_catalog(df: DataFrame, database_name: str, table_name: str):
     glueContext.write_dynamic_frame.from_catalog(
         frame=dynamic_frame,
         database=database_name,
-        table_name=table_name
+        table_name=glue_table_name
     )
     
     # Ler o DynamicFrame de volta do Glue Data Catalog para verificação
     dynamic_frame_read = glueContext.create_dynamic_frame.from_catalog(
         database=database_name,
-        table_name=table_name
+        table_name=glue_table_name
     )
     
     # Converter DynamicFrame lido de volta para DataFrame
@@ -85,14 +95,14 @@ db_host = os.getenv("db_host")  # Substitua por seu valor real ou use variáveis
 db_name = os.getenv("db_name")  # Substitua por seu valor real ou use variáveis de ambiente
 arn_username = os.getenv("arn_username")  # Substitua por seu valor real ou use variáveis de ambiente
 arn_pwd = os.getenv("arn_pwd")  # Substitua por seu valor real ou use variáveis de ambiente
-table_name = os.getenv("table_name")  # Substitua por seu valor real ou use variáveis de ambiente
 db_port = os.getenv("db_port")  # Substitua por seu valor real ou use variáveis de ambiente
+glue_table_name = os.getenv("glue_table_name")  # Substitua por seu valor real ou use variáveis de ambiente
 
 # Obtém a tabela do conector
-df = get_table_from_connector(db_host, db_name, arn_username, arn_pwd, table_name, db_port)
+df = get_table_from_connector(db_host, db_name, arn_username, arn_pwd, db_port)
 
 # Escreve a tabela no Glue Data Catalog
-write_to_glue_catalog(df, db_name, table_name)
+write_to_glue_catalog(df, db_name, glue_table_name)
 
 # Finaliza o job
 job.commit()
