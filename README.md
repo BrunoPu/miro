@@ -1,32 +1,52 @@
-from awsglue.context import GlueContext  # Importa o contexto do AWS Glue
-from awsglue.dynamicframe import DynamicFrame  # Importa o DynamicFrame do AWS Glue
-from pyspark.context import SparkContext  # Importa o contexto do Spark
+import boto3
+import logging
+from awsglue.context import GlueContext
+from pyspark.sql import DataFrame
+from awsglue.dynamicframe import DynamicFrame
 
-# Inicializa o contexto do Spark
-sc = SparkContext()
+def persist_dataframes(glue_context: GlueContext, persist_df: DataFrame, s3_path: str, database: str, table: str) -> None:
+    """
+    Persiste DataFrame no S3 em formato Parquet e atualiza o catálogo do Glue.
+    
+    Args:
+    glue_context (GlueContext): O contexto do Glue.
+    persist_df (DataFrame): O DataFrame a ser persistido.
+    s3_path (str): O caminho do S3 onde os dados serão armazenados.
+    database (str): O nome do banco de dados do Glue.
+    table (str): O nome da tabela do Glue.
+    """
+    
+    try:
+        table_glue = glue_context.getSink(
+            connection_type="s3",
+            path=s3_path,
+            enableUpdateCatalog=True,
+            updateBehavior="LOG",
+            format="glueparquet",
+            transformation_ctx="datasink_tb"
+        )
+        # Configura o sink do Glue com o tipo de conexão, caminho do S3, atualização do catálogo, comportamento de atualização, formato e contexto de transformação
 
-# Inicializa o contexto do AWS Glue
-glueContext = GlueContext(sc)
+        table_glue.setFormat("glueparquet")
+        # Define o formato do sink do Glue para 'glueparquet'
 
-# Configurações para conectar ao SQL Server via JDBC
-sql_server_options = {
-    "url": "jdbc:sqlserver://seu-servidor-sql.database.windows.net:1433;database=seu-banco-de-dados;",
-    "dbtable": "nome_da_tabela_sql_server",  # Nome da tabela no SQL Server
-    "user": "seu_usuario",  # Usuário para autenticação no SQL Server
-    "password": "sua_senha",  # Senha para autenticação no SQL Server
-    "customDriverClass": "com.microsoft.sqlserver.jdbc.SQLServerDriver"  # Driver JDBC para SQL Server
-}
+        table_glue.setCatalogInfo(
+            catalogDatabase=database,
+            catalogTableName=table
+        )
+        # Define as informações do catálogo do sink do Glue com o banco de dados e o nome da tabela
 
-# Lê os dados do SQL Server usando as opções de conexão configuradas
-dynamic_frame = glueContext.create_dynamic_frame.from_options(
-    connection_type="sqlserver",  # Tipo de conexão para SQL Server
-    connection_options=sql_server_options  # Opções de conexão para SQL Server
-)
+        table_glue.writeFrame(DynamicFrame.fromDF(persist_df, glue_context, "persist"))
+        # Escreve o DataFrame fornecido para o sink do Glue
 
-# Escreve os dados para o Glue Data Catalog
-glueContext.write_dynamic_frame.from_catalog(
-    frame=dynamic_frame,  # DataFrame dinâmico que contém os dados do SQL Server
-    database="seu_database_glue",  # Nome do banco de dados no Glue Data Catalog
-    table_name="sua_tabela_glue",  # Nome da tabela no Glue Data Catalog
-    transformation_ctx="transformed_data"  # Contexto de transformação (opcional)
-)
+    except Exception as e:
+        logging.error("Erro ao escrever DataFrame em um arquivo Parquet: %s", e)
+        # Registra um erro caso ocorra uma exceção durante a escrita do DataFrame
+
+        raise e
+        # Relança a exceção para tratamento posterior
+
+# Exemplo de uso
+# glue_context = GlueContext(sc)
+# persist_df = ...
+# persist_dataframes(glue_context, persist_df, "s3://meu-bucket/minha-tabela/", "meu_database", "minha_tabela")
