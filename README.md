@@ -9,39 +9,39 @@ import { HttpClient } from '@angular/common/http'; // Para fazer requisições H
 })
 export class FileUploadFormComponent {
   form: FormGroup; // Grupo de formulários para armazenar todas as respostas
-  base64File: string | null = null; // Para armazenar o arquivo convertido em base64
+  base64Anexo: string | null = null; // Para armazenar o anexo convertido em base64
 
   constructor(private fb: FormBuilder, private http: HttpClient) {
     // Cria o formulário com FormBuilder
     this.form = this.fb.group({
       name: [''], // Exemplo de campo de texto
       email: [''], // Exemplo de campo de e-mail
-      file: ['']   // Campo que será usado para armazenar o arquivo em base64
+      anexo: ['']   // Campo que será usado para armazenar o anexo em base64
     });
   }
 
-  // Método chamado quando um arquivo é selecionado
-  onFileSelected(event: any) {
-    const file: File = event.target.files[0]; // Obtém o arquivo selecionado
+  // Método chamado quando um anexo é selecionado
+  onAnexoSelected(event: any) {
+    const anexo: File = event.target.files[0]; // Obtém o anexo selecionado
 
-    // Verifica se o arquivo é um .msg
-    if (file && file.type === "") {
-      this.convertToBase64(file); // Converte o arquivo para base64
+    // Verifica se o anexo é um .msg
+    if (anexo && anexo.type === "") {
+      this.convertToBase64(anexo); // Converte o anexo para base64
     } else {
       console.error('Por favor, selecione um arquivo .msg válido.');
     }
   }
 
-  // Converte o arquivo para base64 e armazena no formulário
-  convertToBase64(file: File) {
-    const reader = new FileReader(); // Usa FileReader para ler o arquivo
+  // Converte o anexo para base64 e armazena no formulário
+  convertToBase64(anexo: File) {
+    const reader = new FileReader(); // Usa FileReader para ler o anexo
 
     reader.onload = () => {
-      this.base64File = (reader.result as string).split(',')[1]; // Converte para base64
-      this.form.patchValue({ file: this.base64File }); // Atualiza o campo 'file' no formulário com o valor base64
+      this.base64Anexo = (reader.result as string).split(',')[1]; // Converte para base64
+      this.form.patchValue({ anexo: this.base64Anexo }); // Atualiza o campo 'anexo' no formulário com o valor base64
     };
 
-    reader.readAsDataURL(file); // Lê o arquivo como Data URL
+    reader.readAsDataURL(anexo); // Lê o anexo como Data URL
   }
 
   // Método que é chamado ao submeter o formulário
