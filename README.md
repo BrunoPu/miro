@@ -62,3 +62,11 @@ export class FileUploadFormComponent {
     }
   }
 }
+
+
+ resetFileInput() {
+    const fileInput = document.getElementById('fileInput') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = ''; // Limpa o valor do campo
+    }
+  }
