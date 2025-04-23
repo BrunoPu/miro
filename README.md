@@ -1,80 +1,165 @@
-import { Component } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
-
-@Component({
-  selector: 'app-file-upload-form',
-  templateUrl: './file-upload-form.component.html',
-  styleUrls: ['./file-upload-form.component.css']
-})
-export class FileUploadFormComponent {
-  form: FormGroup; // Grupo de formulários para armazenar as respostas
-  base64Anexo: string | null = null; // Para armazenar o anexo convertido em base64
-
-  constructor(private fb: FormBuilder, private http: HttpClient) {
-    // Cria o formulário com FormBuilder
-    this.form = this.fb.group({
-      name: [''], // Campo de texto exemplo
-      email: [''], // Campo de e-mail exemplo
-      anexo: ['']  // Campo onde será armazenado o anexo em base64
-    });
-  }
-
-  // Método chamado quando um arquivo é selecionado
-  onAnexoSelected(event: any) {
-    const anexo: File = event.target.files[0]; // Obtém o arquivo selecionado
-
-    // Verifica se um arquivo foi selecionado e se é um arquivo .msg
-    if (anexo && anexo.name.endsWith('.msg')) {
-      console.log('Arquivo válido selecionado:', anexo.name); // Loga o nome do arquivo
-      this.convertToBase64(anexo); // Converte o arquivo para base64
-    } else {
-      console.error('Por favor, selecione um arquivo .msg válido.');
-      this.resetFileInput(); // Limpa o campo de arquivo
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestão de Certificado Digital</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
     }
-  }
 
-  // Converte o arquivo para base64 e atualiza o formulário
-  convertToBase64(anexo: File) {
-    const reader = new FileReader(); // Usa FileReader para ler o arquivo
-
-    // Quando o arquivo for completamente lido
-    reader.onload = () => {
-      this.base64Anexo = (reader.result as string).split(',')[1]; // Converte para base64
-      console.log('Arquivo convertido para base64:', this.base64Anexo); // Loga o conteúdo base64 para verificar
-      this.form.patchValue({ anexo: this.base64Anexo }); // Atualiza o campo 'anexo' no formulário com o valor base64
-    };
-
-    // Lê o arquivo como Data URL
-    reader.readAsDataURL(anexo);
-  }
-
-  // Método que é chamado ao submeter o formulário
-  onSubmit() {
-    if (this.form.valid) {
-      // Obtém os valores do formulário e envia ao back-end
-      const formData = this.form.value; // Pega os dados do formulário
-      
-      console.log('Formulário enviado com os seguintes dados:', formData); // Verifica os dados antes de enviar
-      
-      // Exemplo de requisição HTTP POST para enviar o formulário ao back-end
-      this.http.post('URL_DO_SEU_BACKEND', formData)
-        .subscribe(response => {
-          console.log('Formulário enviado com sucesso:', response); // Sucesso
-          this.resetFileInput(); // Limpa o campo de arquivo após o envio bem-sucedido
-        }, error => {
-          console.error('Erro ao enviar o formulário:', error); // Erro
-        });
-    } else {
-      console.error('O formulário é inválido.');
+    header {
+      background-color: #f37021;
+      padding: 10px 20px;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-  }
 
-  // Função para limpar o campo de arquivo (input type="file")
-  resetFileInput() {
-    const fileInput = document.getElementById('fileInput') as HTMLInputElement;
-    if (fileInput) {
-      fileInput.value = ''; // Limpa o valor do campo de arquivo
+    header .logo {
+      background: url('https://www.itau.com.br/assets/logo.svg') no-repeat left center;
+      background-size: contain;
+      width: 50px;
+      height: 30px;
     }
-  }
-}
+
+    .user-info {
+      font-size: 12px;
+      text-align: right;
+    }
+
+    .content {
+      padding: 30px 40px;
+    }
+
+    h1 {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 8px;
+      padding: 15px;
+      box-shadow: 0 0 6px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: box-shadow 0.3s;
+    }
+
+    .card:hover {
+      box-shadow: 0 0 12px rgba(0,0,0,0.2);
+    }
+
+    .card h2 {
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .card p {
+      font-size: 12px;
+      color: #555;
+    }
+
+    .button {
+      margin-top: 30px;
+      text-align: right;
+    }
+
+    .button button {
+      background-color: #f37021;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .button button:hover {
+      background-color: #d35f1b;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo"></div>
+  <div class="user-info">
+    BRUNO HENRIQUE PUGLIESE<br>
+    Código Funcional: 987237598
+  </div>
+</header>
+
+<div class="content">
+  <h1>Bem-vindo, <strong>BRUNO HENRIQUE PUGLIESE</strong></h1>
+  <p class="subtitle">
+    No sistema de Gestão de Certificado Digital você pode cadastrar, gerir e verificar dúvidas frequentes de certificados.<br>
+    <a href="#">Critérios de Segurança da Informação para Gerenciamento de Certificados Digitais (Brasil)</a>
+  </p>
+
+  <h3>Selecione opção desejada:</h3>
+  <div class="cards">
+    <div class="card">
+      <h2>Solicitações de Certificado</h2>
+      <p>Solicite certificados externos e internos de pessoas e AWPS.</p>
+    </div>
+    <div class="card">
+      <h2>Minhas Solicitações</h2>
+      <p>Acompanhe suas solicitações de certificado.</p>
+    </div>
+    <div class="card">
+      <h2>Consulta de Certificados</h2>
+      <p>Consulte certificados em seu nome ou de terceiros.</p>
+    </div>
+    <div class="card">
+      <h2>Indicar renovação ou revogação</h2>
+      <p>Renove ou revogue certificados On Premise.</p>
+    </div>
+    <div class="card">
+      <h2>Lista Status Renovacao</h2>
+      <p>Acompanhamento dos status da renovação.</p>
+    </div>
+    <div class="card">
+      <h2>Gestão de Responsavel</h2>
+      <p>Indique, aprove, recuse ou cancele solicitações.</p>
+    </div>
+    <div class="card">
+      <h2>Gestão de Auto Assinado</h2>
+      <p>Cadastre seu Certificado Auto Assinado.</p>
+    </div>
+    <div class="card">
+      <h2>Saiba mais</h2>
+      <p>Encontre as respostas para suas dúvidas sobre certificados e políticas internas.</p>
+    </div>
+    <div class="card">
+      <h2>Gestão de certificados</h2>
+      <p>Faça uma gestão detalhada de todos os certificados do banco.</p>
+    </div>
+    <div class="card">
+      <h2>Gestão Admin</h2>
+      <p>Acesse opções administrativas do sistema.</p>
+    </div>
+  </div>
+
+  <div class="button">
+    <button>Avaliar experiência</button>
+  </div>
+</div>
+
+</body>
+</html>
